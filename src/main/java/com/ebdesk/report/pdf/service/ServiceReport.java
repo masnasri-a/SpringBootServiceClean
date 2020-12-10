@@ -9,6 +9,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 public interface ServiceReport {
 	Map<String, Object> serviceReport(String start, String end, String criteria, String interval, String source,
-			String media_tags, String elastic, String limit, String w_id)
+			String media_tags, String elastic, String limit, String w_id, String w_app_logo)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException;
 }

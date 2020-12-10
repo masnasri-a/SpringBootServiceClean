@@ -1,15 +1,20 @@
 package com.ebdesk.report.pdf.service.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +45,8 @@ import com.itextpdf.text.pdf.PdfPCellEvent;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import javax.imageio.ImageIO;
+
 @Service
 public class ServiceReportImplement implements ServiceReport {
 
@@ -63,7 +70,7 @@ public class ServiceReportImplement implements ServiceReport {
 
 	@Override
 	public Map<String, Object> serviceReport(String start, String end, String criteria, String interval, String source,
-			String media_tags, String elastic, String limit, String w_id)
+			String media_tags, String elastic, String limit, String w_id, String w_app_logo)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException {
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -76,8 +83,11 @@ public class ServiceReportImplement implements ServiceReport {
 		ObjectMapper om = new ObjectMapper();
 
 		List<Object> data_resume = es.resume(start, end, criteria, source, media_tags, elastic);
+//		System.out.println("data resume : " + data_resume);
 		List<Object> data_table = es.data(start, end, criteria, source, media_tags, elastic);
+//		System.out.println("data data_table : " + data_table);
 		List<Object> data_content = es.content(start, end, criteria, source, media_tags, elastic);
+//		System.out.println("data data_content : " + data_content);
 
 		String name_file = "";
 		String output = "";
@@ -121,21 +131,65 @@ public class ServiceReportImplement implements ServiceReport {
 
 				document.add(space);
 				document.add(title);
-				document.add(space);
+//				document.add(space);
 
 				File f = new File(workspace_logo);
 
-				if (f.exists()) {
-					Image w_app_logo = Image.getInstance(workspace_logo);
-					w_app_logo.scaleAbsolute(180, 70);
-					w_app_logo.setAlignment(Element.ALIGN_CENTER);
-					document.add(w_app_logo);
-				} else {
-					Image w_app_logo = Image.getInstance(externalConfig.getPath_workspace_logo() + "ebdesk.png");
-					w_app_logo.scaleAbsolute(180, 70);
-					w_app_logo.setAlignment(Element.ALIGN_CENTER);
-					document.add(w_app_logo);
+				String default_logo = "default+logo.png";
+
+				if (!w_app_logo.equals("default+logo.png")){
+					try {
+						URL url = new URL("http://"+externalConfig.getW_app_logo_url()+w_app_logo);
+
+						final HttpURLConnection connection = (HttpURLConnection) url
+								.openConnection();
+
+						connection.setRequestProperty(
+								"User-Agent",
+								"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+
+						connection.setConnectTimeout(100);
+
+						BufferedImage image = ImageIO.read(connection.getInputStream());
+
+						default_logo = externalConfig.getW_app_logo()+w_app_logo;
+
+						if (image != null){
+							if (w_app_logo.contains("jpg")){
+								ImageIO.write(image, "jpg", new File(default_logo));
+							}else if (w_app_logo.contains("png")){
+								ImageIO.write(image, "png", new File(default_logo));
+							}else if (w_app_logo.contains(".gif")){
+								ImageIO.write(image, "gif", new File(default_logo));
+							}
+							Image logoCover = Image.getInstance(default_logo);
+							logoCover.scaleAbsolute(250, 150);
+							logoCover.setAlignment(Element.ALIGN_CENTER);
+							document.add(logoCover);
+						}
+					}catch (Exception ee){
+						ee.printStackTrace();
+					}
+				}else {
+					default_logo = externalConfig.getW_app_logo()+w_app_logo;
+					Image logo = Image.getInstance(default_logo);
+					logo.scaleAbsolute(250, 150);
+					logo.setAlignment(Element.ALIGN_CENTER);
+					document.add(logo);
 				}
+
+
+//				if (f.exists()) {
+//					Image w_app_logo = Image.getInstance(workspace_logo);
+//					w_app_logo.scaleAbsolute(180, 70);
+//					w_app_logo.setAlignment(Element.ALIGN_CENTER);
+//					document.add(w_app_logo);
+//				} else {
+//					Image w_app_logo = Image.getInstance(externalConfig.getPath_workspace_logo() + "ebdesk.png");
+//					w_app_logo.scaleAbsolute(180, 70);
+//					w_app_logo.setAlignment(Element.ALIGN_CENTER);
+//					document.add(w_app_logo);
+//				}
 
 				document.add(space);
 				document.add(desc);
@@ -277,7 +331,7 @@ public class ServiceReportImplement implements ServiceReport {
 				cell6.setVerticalAlignment(Element.ALIGN_MIDDLE);
 				PdfPCell cell7 = new PdfPCell(new Paragraph("Resume", font_table));
 				cell7.setBackgroundColor(BaseColor.LIGHT_GRAY);
-				cell7.setHorizontalAlignment(Element.ALIGN_CENTER);
+				cell7.setHorizontalAlignment(Element.ALIGN_LEFT);
 				cell7.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
 				table_contents.addCell(cell1);
@@ -368,19 +422,80 @@ public class ServiceReportImplement implements ServiceReport {
 					String path_logo_news = externalConfig.getNews_logo() + node.get("media").asText().replace(" ", "+")
 							+ ".jpg";
 
-					File f_news = new File(path_logo_news);
+					if (!node.get("link_image").equals("") && !node.get("link_image").equals("null") && !node.get("link_image").asText().contains("(") && node.get("link_image") != null){
+						if (node.get("link_image").asText().contains(".jpg")
+								| node.get("link_image").asText().contains(".png")){
+							try {
+								URL url = new URL(node.get("link_image").asText().replaceAll("(?<=.jpg).*|(?<=.png).*", ""));
 
-					if (f_news.exists()) {
-						Image logo = Image.getInstance(path_logo_news);
-						logo.scaleAbsolute(70, 70);
-						logo.setAlignment(Element.ALIGN_CENTER);
-						document.add(logo);
-					} else {
-						Image logo = Image.getInstance(externalConfig.getNews_logo() + "default+logo.png");
+								final HttpURLConnection connection = (HttpURLConnection) url
+										.openConnection();
+
+								connection.setRequestProperty(
+										"User-Agent",
+										"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+
+								connection.setConnectTimeout(10);
+
+								BufferedImage image = ImageIO.read(connection.getInputStream());
+
+								String path_image = externalConfig.getOnline_image()
+										+ node.get("title").asText().replace(" ", "_")
+										.replace("?", "")
+										.replaceAll("\\W","")+".jpg";
+
+								if (image != null){
+									if (w_app_logo.contains("jpg")){
+										ImageIO.write(image, "jpg", new File(path_image));
+									}else if (w_app_logo.contains("png")){
+										ImageIO.write(image, "png", new File(path_image));
+									}else if (w_app_logo.contains(".gif")){
+										ImageIO.write(image, "gif", new File(path_image));
+									}
+
+									Image logo = Image.getInstance(path_image);
+									logo.scaleAbsolute(200, 100);
+									logo.setAlignment(Element.ALIGN_CENTER);
+									document.add(logo);
+								}else {
+									Image logo = Image.getInstance(default_logo);
+									logo.scaleAbsolute(70, 70);
+									logo.setAlignment(Element.ALIGN_CENTER);
+									document.add(logo);
+								}
+							}catch (Exception e){
+//								e.printStackTrace();
+								Image logo = Image.getInstance(default_logo);
+								logo.scaleAbsolute(70, 70);
+								logo.setAlignment(Element.ALIGN_CENTER);
+								document.add(logo);
+							}
+						}else {
+							Image logo = Image.getInstance(default_logo);
+							logo.scaleAbsolute(70, 70);
+							logo.setAlignment(Element.ALIGN_CENTER);
+							document.add(logo);
+						}
+					}else {
+						Image logo = Image.getInstance(default_logo);
 						logo.scaleAbsolute(65, 65);
 						logo.setAlignment(Element.ALIGN_CENTER);
 						document.add(logo);
 					}
+
+//						File f_news = new File(path_logo_news);
+//
+//					if (f_news.exists()) {
+//						Image logo = Image.getInstance(path_logo_news);
+//						logo.scaleAbsolute(70, 70);
+//						logo.setAlignment(Element.ALIGN_CENTER);
+//						document.add(logo);
+//					} else {
+//						Image logo = Image.getInstance(externalConfig.getNews_logo() + "default+logo.png");
+//						logo.scaleAbsolute(65, 65);
+//						logo.setAlignment(Element.ALIGN_CENTER);
+//						document.add(logo);
+//					}
 
 					document.add(new Paragraph(" "));
 
@@ -445,17 +560,17 @@ public class ServiceReportImplement implements ServiceReport {
 
 				File f = new File(workspace_logo);
 
-				if (f.exists()) {
-					Image w_app_logo = Image.getInstance(workspace_logo);
-					w_app_logo.scaleAbsolute(180, 70);
-					w_app_logo.setAlignment(Element.ALIGN_CENTER);
-					document.add(w_app_logo);
-				} else {
-					Image w_app_logo = Image.getInstance(externalConfig.getPath_workspace_logo() + "ebdesk.png");
-					w_app_logo.scaleAbsolute(180, 70);
-					w_app_logo.setAlignment(Element.ALIGN_CENTER);
-					document.add(w_app_logo);
-				}
+//				if (f.exists()) {
+//					Image w_app_logo = Image.getInstance(workspace_logo);
+//					w_app_logo.scaleAbsolute(180, 70);
+//					w_app_logo.setAlignment(Element.ALIGN_CENTER);
+//					document.add(w_app_logo);
+//				} else {
+//					Image w_app_logo = Image.getInstance(externalConfig.getPath_workspace_logo() + "ebdesk.png");
+//					w_app_logo.scaleAbsolute(180, 70);
+//					w_app_logo.setAlignment(Element.ALIGN_CENTER);
+//					document.add(w_app_logo);
+//				}
 
 				document.add(space);
 				document.add(desc);
@@ -599,7 +714,7 @@ public class ServiceReportImplement implements ServiceReport {
 				cell6.setVerticalAlignment(Element.ALIGN_MIDDLE);
 				PdfPCell cell7 = new PdfPCell(new Paragraph("Resume", font_table));
 				cell7.setBackgroundColor(BaseColor.LIGHT_GRAY);
-				cell7.setHorizontalAlignment(Element.ALIGN_CENTER);
+				cell7.setHorizontalAlignment(Element.ALIGN_LEFT);
 				cell7.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
 				table_contents.addCell(cell1);

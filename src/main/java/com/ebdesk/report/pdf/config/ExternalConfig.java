@@ -13,6 +13,9 @@ public class ExternalConfig {
 	private String path_workspace_logo;
 	private String news_logo;
 	private String printed_image;
+	private String online_image;
+	private String w_app_logo;
+	private String w_app_logo_url;
 	private String api_data;
 
 	public String getPath_save() {
@@ -71,4 +74,27 @@ public class ExternalConfig {
 		this.api_data = api_data;
 	}
 
+	public String getOnline_image() {
+		return online_image;
+	}
+
+	public void setOnline_image(String online_image) {
+		this.online_image = online_image;
+	}
+
+	public String getW_app_logo() {
+		return w_app_logo;
+	}
+
+	public void setW_app_logo(String w_app_logo) {
+		this.w_app_logo = w_app_logo;
+	}
+
+	public String getW_app_logo_url() {
+		return w_app_logo_url;
+	}
+
+	public void setW_app_logo_url(String w_app_logo_url) {
+		this.w_app_logo_url = w_app_logo_url;
+	}
 }
