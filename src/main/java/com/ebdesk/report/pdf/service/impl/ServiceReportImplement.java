@@ -416,7 +416,15 @@ public class ServiceReportImplement implements ServiceReport {
 					table_detail_contents.addCell(new Paragraph(""));
 
 					table_detail_contents.addCell(new Paragraph("Author"));
-					table_detail_contents.addCell(new Paragraph(""));
+					if (node.has("reporter")){
+						if (!node.get("reporter").asText().equals("")){
+							table_detail_contents.addCell(new Paragraph(node.get("reporter").asText()));
+						}else {
+							table_detail_contents.addCell(new Paragraph("_noname"));
+						}
+					}else {
+						table_detail_contents.addCell(new Paragraph("_noname"));
+					}
 					document.add(table_detail_contents);
 
 					String path_logo_news = externalConfig.getNews_logo() + node.get("media").asText().replace(" ", "+")
