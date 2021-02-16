@@ -686,13 +686,13 @@ public class ServiceReportImplement implements ServiceReport {
 						+ " - " + sdf.format(format.parseObject(end)), font_title);
 				document.add(contents);
 
-				PdfPTable table_contents = new PdfPTable(7);
+				PdfPTable table_contents = new PdfPTable(8);
 				table_contents.setWidthPercentage(109); // Width 100%
 				table_contents.setSpacingBefore(10f); // Space before table
 				table_contents.setSpacingAfter(10f); // Space after table
 
 				// Set Column widths
-				float[] columnContents = { 0.3f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 1.5f };
+				float[] columnContents = { 0.3f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 1.5f };
 				table_contents.setHeaderRows(1);
 				table_contents.setWidths(columnContents);
 
@@ -708,22 +708,26 @@ public class ServiceReportImplement implements ServiceReport {
 				cell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
 				cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell3.setVerticalAlignment(Element.ALIGN_MIDDLE);
-				PdfPCell cell4 = new PdfPCell(new Paragraph("Sentiment", font_table));
+				PdfPCell cell4 = new PdfPCell(new Paragraph("Page", font_table));
 				cell4.setBackgroundColor(BaseColor.LIGHT_GRAY);
 				cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell4.setVerticalAlignment(Element.ALIGN_MIDDLE);
-				PdfPCell cell5 = new PdfPCell(new Paragraph("Media", font_table));
+				PdfPCell cell5 = new PdfPCell(new Paragraph("Sentiment", font_table));
 				cell5.setBackgroundColor(BaseColor.LIGHT_GRAY);
 				cell5.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell5.setVerticalAlignment(Element.ALIGN_MIDDLE);
-				PdfPCell cell6 = new PdfPCell(new Paragraph("Influencers", font_table));
+				PdfPCell cell6 = new PdfPCell(new Paragraph("Media", font_table));
 				cell6.setBackgroundColor(BaseColor.LIGHT_GRAY);
 				cell6.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell6.setVerticalAlignment(Element.ALIGN_MIDDLE);
-				PdfPCell cell7 = new PdfPCell(new Paragraph("Resume", font_table));
+				PdfPCell cell7 = new PdfPCell(new Paragraph("Influencers", font_table));
 				cell7.setBackgroundColor(BaseColor.LIGHT_GRAY);
-				cell7.setHorizontalAlignment(Element.ALIGN_LEFT);
+				cell7.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell7.setVerticalAlignment(Element.ALIGN_MIDDLE);
+				PdfPCell cell8 = new PdfPCell(new Paragraph("Resume", font_table));
+				cell8.setBackgroundColor(BaseColor.LIGHT_GRAY);
+				cell8.setHorizontalAlignment(Element.ALIGN_LEFT);
+				cell8.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
 				table_contents.addCell(cell1);
 				table_contents.addCell(cell2);
@@ -732,6 +736,7 @@ public class ServiceReportImplement implements ServiceReport {
 				table_contents.addCell(cell5);
 				table_contents.addCell(cell6);
 				table_contents.addCell(cell7);
+				table_contents.addCell(cell8);
 
 				int no = 1;
 				for (Object obj : data_table) {
@@ -741,6 +746,7 @@ public class ServiceReportImplement implements ServiceReport {
 					table_contents.addCell(String.valueOf(no));
 					table_contents.addCell(data.get("date"));
 					table_contents.addCell(data.get("news_title"));
+					table_contents.addCell(data.get("page"));
 					table_contents.addCell(data.get("tone"));
 					table_contents.addCell(data.get("media"));
 					table_contents.addCell(data.get("influencers"));
@@ -781,18 +787,22 @@ public class ServiceReportImplement implements ServiceReport {
 					List<String> list_image = download.downloadImage(node.get("link").asText(),
 							node.get("media").asText(), externalConfig.getPrinted_image());
 
-					PdfPTable table_detail_contents = new PdfPTable(2);
+					PdfPTable table_detail_contents = new PdfPTable(4);
 					table_detail_contents.setWidthPercentage(100); // Width 100%
 					table_detail_contents.setSpacingBefore(10f); // Space before table
 					table_detail_contents.setSpacingAfter(10f); // Space after table
 
 					// Set Column widths
-					float[] columnDetailContents = { 0.3f, 2f };
+					float[] columnDetailContents = { 0.3f, 1f, 0.3f, 1f};
 					table_detail_contents.setWidths(columnDetailContents);
 
 					table_detail_contents.addCell(new Paragraph("Title"));
+
 					if (node.has("title")) {
-						table_detail_contents.addCell(new Paragraph(node.get("title").asText()));
+						PdfPCell cellTitleValue=new PdfPCell();
+						cellTitleValue.setPhrase(new Paragraph(node.get("title").asText()));
+						cellTitleValue.setColspan(3);//Merge Cells
+						table_detail_contents.addCell(cellTitleValue);
 					}
 
 					table_detail_contents.addCell(new Paragraph("Media"));
@@ -800,40 +810,45 @@ public class ServiceReportImplement implements ServiceReport {
 						table_detail_contents.addCell(new Paragraph(node.get("media").asText()));
 					}
 
+					table_detail_contents.addCell(new Paragraph("Reporter"));
+					table_detail_contents.addCell(new Paragraph(""));
+
 					table_detail_contents.addCell(new Paragraph("Date"));
 					if (node.has("date")) {
 						table_detail_contents.addCell(node.get("date").asText());
 					}
 
+					table_detail_contents.addCell(new Paragraph("Tone"));
+					if (node.has("tone")) {
+						table_detail_contents.addCell(new Paragraph(node.get("tone").asText()));
+					}
+
+					table_detail_contents.addCell(new Paragraph("Page"));
+					if (node.has("page")) {
+						table_detail_contents.addCell(new Paragraph(node.get("page").asText()));
+					}
+
+					table_detail_contents.addCell(new Paragraph("PR Value"));
+					table_detail_contents.addCell(new Paragraph(""));
+
 					table_detail_contents.addCell(new Paragraph("Link"));
 					if (node.has("link")) {
 
-						PdfPCell cell = new PdfPCell(new Phrase(node.get("link").asText()));
-						cell.setCellEvent(new LinkInCell(node.get("link").asText()));
-						table_detail_contents.addCell(cell);
+						PdfPCell cellLink = new PdfPCell(new Phrase(node.get("link").asText()));
+						cellLink.setCellEvent(new LinkInCell(node.get("link").asText().replaceAll("imm.ebdesk.com", "ima.blackeye.id")));
+						cellLink.setColspan(3);
+						table_detail_contents.addCell(cellLink);
 //						table_detail_contents.addCell(new Paragraph(node.get("link").asText()));
-					}
-
-					table_detail_contents.addCell(new Paragraph("Sentiment"));
-					if (node.has("tone")) {
-						table_detail_contents.addCell(new Paragraph(node.get("tone").asText()));
 					}
 
 					table_detail_contents.addCell(new Paragraph("Resume"));
 					if (node.has("resume")) {
 						PdfPCell cellResume = new PdfPCell(new Paragraph(node.get("resume").asText()));
 						cellResume.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+						cellResume.setColspan(3);
 						table_detail_contents.addCell(cellResume);
 					}
 
-					table_detail_contents.addCell(new Paragraph("Reporter"));
-					table_detail_contents.addCell(new Paragraph(""));
-
-					table_detail_contents.addCell(new Paragraph("PR Value"));
-					table_detail_contents.addCell(new Paragraph(""));
-
-					table_detail_contents.addCell(new Paragraph("AD Value"));
-					table_detail_contents.addCell(new Paragraph(""));
 					document.add(table_detail_contents);
 
 					for (Object image : list_image) {
