@@ -4,26 +4,29 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.ebdesk.report.pdf.dao.*;
+import com.ebdesk.report.pdf.model.MessageModel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ebdesk.report.pdf.config.ExternalConfig;
-import com.ebdesk.report.pdf.dao.DownloadImagePrinted;
-import com.ebdesk.report.pdf.dao.GenerateChart;
-import com.ebdesk.report.pdf.dao.PdfElasticCriteriaId;
-import com.ebdesk.report.pdf.dao.RedisDao;
-import com.ebdesk.report.pdf.dao.SqlDao;
 import com.ebdesk.report.pdf.service.ServiceReport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,13 +71,28 @@ public class ServiceReportImplement implements ServiceReport {
 	@Autowired
 	private ExternalConfig externalConfig;
 
+	@Autowired
+	private ManagementReport managementReport;
+
+	@Autowired
+	ServiceReport service;
+
 	@Override
 	public Map<String, Object> serviceReport(String start, String end, String criteria, String interval, String source,
-			String media_tags, String elastic, String limit, String w_id, String w_app_logo)
+			String media_tags, String elastic, String limit, String w_id, String w_app_logo, String id)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		Map<String, String> c = redis.keywordRedis(criteria);
+		JSONObject status = new JSONObject();
+
+		w_app_logo = cleanText(w_app_logo);
+
+		if (!id.equals("")){
+			status.put("status", "1");
+			managementReport.updateStatus(id, status);
+		}
+
 		String workspace_logo = externalConfig.getPath_workspace_logo() + sql.pathLogoWorkspace(w_id);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
@@ -91,6 +109,11 @@ public class ServiceReportImplement implements ServiceReport {
 
 		String name_file = "";
 		String output = "";
+
+		if (!id.equals("")){
+			status.put("status", "20");
+			managementReport.updateStatus(id, status);
+		}
 
 		if (elastic.equals("online")) {
 			Document document = new Document();
@@ -238,6 +261,10 @@ public class ServiceReportImplement implements ServiceReport {
 				String neutral = "";
 				String negative = "";
 
+				if (!id.equals("")){
+					status.put("status", "40");
+					managementReport.updateStatus(id, status);
+				}
 				for (Object data : data_resume) {
 					ObjectNode node = om.readValue(data.toString(), ObjectNode.class);
 					if (node.has("media")) {
@@ -259,6 +286,11 @@ public class ServiceReportImplement implements ServiceReport {
 				table_resume.addCell(neutral);
 				table_resume.addCell(negative);
 				document.add(table_resume);
+
+				if (!id.equals("")){
+					status.put("status", "50");
+					managementReport.updateStatus(id, status);
+				}
 
 				Map<String, String> resource_chart = chart.chartImage(start, end, criteria, interval, source,
 						media_tags, elastic, limit, externalConfig.getPath_chart_image());
@@ -342,6 +374,11 @@ public class ServiceReportImplement implements ServiceReport {
 				table_contents.addCell(cell6);
 				table_contents.addCell(cell7);
 
+				if (!id.equals("")){
+					status.put("status", "70");
+					managementReport.updateStatus(id, status);
+				}
+
 				int no = 1;
 				for (Object obj : data_table) {
 					@SuppressWarnings("unchecked")
@@ -362,6 +399,11 @@ public class ServiceReportImplement implements ServiceReport {
 				}
 
 				document.add(table_contents);
+
+				if (!id.equals("")){
+					status.put("status", "80");
+					managementReport.updateStatus(id, status);
+				}
 
 				// page 4
 				document.newPage();
@@ -516,11 +558,19 @@ public class ServiceReportImplement implements ServiceReport {
 					document.newPage();
 
 				}
+				if (!id.equals("")){
+					status.put("status", "90");
+					managementReport.updateStatus(id, status);
+				}
 
 				output = externalConfig.getPath_save() + name_file;
 
 				document.close();
 				writer.close();
+				if (!id.equals("")){
+					status.put("status", "100");
+					managementReport.updateStatus(id, status);
+				}
 
 			} catch (DocumentException e) {
 				e.printStackTrace();
@@ -626,6 +676,11 @@ public class ServiceReportImplement implements ServiceReport {
 				String neutral = "";
 				String negative = "";
 
+				if (!id.equals("")){
+					status.put("status", "40");
+					managementReport.updateStatus(id, status);
+				}
+
 				for (Object data : data_resume) {
 					ObjectNode node = om.readValue(data.toString(), ObjectNode.class);
 					if (node.has("media")) {
@@ -647,6 +702,11 @@ public class ServiceReportImplement implements ServiceReport {
 				table_resume.addCell(neutral);
 				table_resume.addCell(negative);
 				document.add(table_resume);
+
+				if (!id.equals("")){
+					status.put("status", "50");
+					managementReport.updateStatus(id, status);
+				}
 
 				// statistic
 				Paragraph daily_statistic = new Paragraph("Daily Statistic", font_title);
@@ -738,6 +798,11 @@ public class ServiceReportImplement implements ServiceReport {
 				table_contents.addCell(cell7);
 				table_contents.addCell(cell8);
 
+				if (!id.equals("")){
+					status.put("status", "70");
+					managementReport.updateStatus(id, status);
+				}
+
 				int no = 1;
 				for (Object obj : data_table) {
 					@SuppressWarnings("unchecked")
@@ -760,6 +825,11 @@ public class ServiceReportImplement implements ServiceReport {
 
 				document.add(table_contents);
 				document.newPage();
+
+				if (!id.equals("")){
+					status.put("status", "80");
+					managementReport.updateStatus(id, status);
+				}
 
 				// page 4
 				for (Object object : data_content) {
@@ -861,10 +931,20 @@ public class ServiceReportImplement implements ServiceReport {
 					document.newPage();
 				}
 
+				if (!id.equals("")){
+					status.put("status", "90");
+					managementReport.updateStatus(id, status);
+				}
+
 				output = externalConfig.getPath_save() + name_file;
 
 				document.close();
 				writer.close();
+
+				if (!id.equals("")){
+					status.put("status", "100");
+					managementReport.updateStatus(id, status);
+				}
 
 			} catch (DocumentException e) {
 				e.printStackTrace();
@@ -892,6 +972,156 @@ public class ServiceReportImplement implements ServiceReport {
 			PdfAnnotation link = PdfAnnotation.createLink(writer, position, PdfAnnotation.HIGHLIGHT_INVERT, action);
 			writer.addAnnotation(link);
 		}
+	}
+
+	@Override
+	public MessageModel generateReport(String criteria, String w_id, String category, String platform, String start, String end,
+									   String interval, String w_app_logo) throws IOException {
+		MessageModel msg = new MessageModel();
+
+		Map<String, String> query_string = redis.keywordRedis(criteria);
+
+		try {
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat file = new SimpleDateFormat("dd-MMM-yyyy");
+
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat formatter = new SimpleDateFormat("dd MMMMM yyyy");
+
+			Date date_st = sdf.parse(start);
+			Date date_ed = sdf.parse(end);
+
+			String start_date = formatter.format(date_st);
+			String end_date = formatter.format(date_ed);
+
+			String filename = "";
+
+			switch (platform.toLowerCase()){
+				case "online" :
+					filename = "report_online_" + query_string.get("criteria_name") + ".pdf";
+
+					break;
+				case "printed":
+					filename = "report_cetak_" + query_string.get("criteria_name") + ".pdf";
+					break;
+			}
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("file_name", filename);
+			jsonObject.put("status", "0");
+			jsonObject.put("w_id", w_id);
+			jsonObject.put("topic", query_string.get("criteria_name").toString().toLowerCase());
+			jsonObject.put("category", category.toLowerCase());
+			jsonObject.put("platform", platform.toLowerCase());
+			jsonObject.put("start_date", start);
+			jsonObject.put("end_date", end);
+			jsonObject.put("created_at", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
+			String id = managementReport.insertManagementReport(jsonObject);
+
+			System.out.println("id : " + id);
+
+			Thread newThread = new Thread(() -> {
+				try {
+					service.serviceReport(start, end, criteria, interval, "", "", platform, "", w_id, w_app_logo, id);
+				} catch (Exception e) {
+					JSONObject status = new JSONObject();
+					status.put("status", "error");
+					try {
+						managementReport.updateStatus(id, status);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					e.printStackTrace();
+				}
+			});
+
+			newThread.start();
+
+			msg.setStatus(true);
+			msg.setMessage("success");
+			msg.setData(filename);
+
+		} catch (Exception e) {
+
+			msg.setStatus(false);
+			msg.setMessage("data not available");
+			e.printStackTrace();
+		}
+
+		return msg;
+	}
+
+	@Override
+	public MessageModel getReport(String w_id, String topic, String platform){
+		MessageModel msg = new MessageModel();
+
+		try {
+			msg.setData(managementReport.getReport(w_id, topic, platform));
+			msg.setStatus(true);
+			msg.setMessage("success");
+		}catch (Exception e){
+			msg.setStatus(false);
+			msg.setMessage("failed");
+		}
+
+		return msg;
+	}
+
+	@SuppressWarnings({ "deprecation", "static-access" })
+	@Override
+	public MessageModel deleteById(String id) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+		MessageModel msg = new MessageModel();
+		try {
+//		String param = "{\"query\": {\"bool\": {\"must\": [{\"match_phrase\": {\"w_id\": \""+w_id+"\"}}," +
+//				"{\"match_phrase\": {\"file_name\": \""+file_name+"\"}},{\"match_phrase\": {\"category\": \""+category+"\"}}" +
+//				",{\"match_phrase\": {\"platform\": \""+platform+"\"}}]}}}";
+//		Client client1 = Client.create();
+//
+//		WebResource webResource = client1.resource("http://"+elasticConfig.getHost()+"/management-report/_search");
+//		String input = param;
+//
+//		ClientResponse response = webResource.type("application/json").post(ClientResponse.class, input);
+//		if (response.getStatus() != 200) {
+//			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
+//		}
+//
+//		String output = response.getEntity(String.class);
+//
+//		ObjectNode dataElastic = new ObjectMapper().readValue(output, ObjectNode.class);
+//		String hsl = "";
+//		for (JsonNode node : dataElastic.get("hits").get("hits")) {
+//			hsl = node.get("_id").asText();
+//		}
+//		System.out.println(hsl);
+			msg.setData(managementReport.deleteById(id));
+			msg.setStatus(true);
+			msg.setMessage("success");
+		}catch (Exception e){
+			msg.setStatus(false);
+			msg.setMessage("failed");
+		}
+		return msg;
+	}
+
+	public String cleanText(String text){
+		text = text.replace("%20", " ")
+				.replace( "%2B", "+")
+				.replace("%22", "\"")
+				.replace("%23", "#")
+				.replace("%24", "$")
+				.replace("%25", "%")
+				.replace("%26", "&")
+				.replace("%27", "'")
+				.replace("%28", "(")
+				.replace("%29", ")")
+				.replace("%2A", "*")
+				.replace("%2B", "+")
+				.replace("%2C", ",")
+				.replace("%2C", ",")
+				.replace("%21", "!");
+		return text;
 	}
 
 }
