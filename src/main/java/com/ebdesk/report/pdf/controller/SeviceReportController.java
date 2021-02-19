@@ -31,14 +31,15 @@ public class SeviceReportController {
 			@RequestParam(value = "interval", defaultValue = "hour") String interval,
 			@RequestParam(value = "w_app_logo", defaultValue = "default+logo.png") String w_app_logo,
 			@RequestParam(value = "elastic", defaultValue = "online", required = false) String elastic,
-			@RequestParam(value = "w_id", defaultValue = "1", required = false) String w_id)
+			@RequestParam(value = "w_id", defaultValue = "1", required = false) String w_id,
+			@RequestParam(value = "id", defaultValue = "") String id)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException {
 
 		MessageModel msg = new MessageModel();
 
 		try {
 
-			Map<String, Object> ret = service.serviceReport(start, end, criteria, interval, "", "", elastic, "", w_id, w_app_logo);
+			Map<String, Object> ret = service.serviceReport(start, end, criteria, interval, "", "", elastic, "", w_id, w_app_logo, id);
 
 			msg.setStatus(true);
 			msg.setMessage("success");
@@ -66,7 +67,7 @@ public class SeviceReportController {
 			@RequestParam(value = "w_id", defaultValue = "1", required = false) String w_id)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException {
 
-		Map<String, Object> ret = service.serviceReport(start, end, criteria, interval, "", "", elastic, "", w_id, w_app_logo);
+		Map<String, Object> ret = service.serviceReport(start, end, criteria, interval, "", "", elastic, "", w_id, w_app_logo, "");
 
 		InputStream myStream = new FileInputStream(new File(ret.get("path").toString()));
 
