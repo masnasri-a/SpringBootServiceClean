@@ -216,7 +216,7 @@ public class PdfElasticCriteriaId {
 			Client client = Client.create();
 
 			WebResource webResource = client.resource("http://" + externalConfig.getApi_data() + "/getData?end=" + end
-					+ "&criteria_id=" + criteria_id + "&limit=100&media_tags=" + media_tags + "&source=" + source
+					+ "&criteria_id=" + criteria_id + "&limit=5000&media_tags=" + media_tags + "&source=" + source
 					+ "&start=" + start + "&elastic=" + elastic);
 
 			ClientResponse response = webResource.type("application/json").get(ClientResponse.class);
