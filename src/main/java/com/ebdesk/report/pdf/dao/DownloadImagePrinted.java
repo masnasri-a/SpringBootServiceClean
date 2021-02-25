@@ -18,10 +18,11 @@ public class DownloadImagePrinted {
 	public List<String> downloadImage(String link, String media, String path_image_printed) throws IOException {
 
 		List<String> listImage = new ArrayList<String>();
-		List<String> link_list = new ArrayList<String>(Arrays.asList(link.split(";")));
+		List<String> link_list = new ArrayList<String>(Arrays.asList(link.replace(";%20", "|%20").split(";")));
 
 		for (String imageUrl : link_list) {
-			URL url = new URL(imageUrl.replace("ima.blackeye.id", "imm.ebdesk.com"));
+//			System.out.println(imageUrl.replace("|%20", ";%20").replace("ima.blackeye.id", "imm.ebdesk.com"));
+			URL url = new URL(imageUrl.replace("|%20", ";%20").replace("ima.blackeye.id", "imm.ebdesk.com"));
 			String fileName = url.getFile();
 			String destName = path_image_printed + media + "_" + fileName.replace("/", "");
 
