@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.WordUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -98,7 +100,7 @@ public class GenerateChart {
 			for (Map.Entry<String, Integer> entry : map.entrySet()) {
 				String key = entry.getKey();
 				Integer value = entry.getValue();
-				datasetMediaShare.addValue(value, "media", key);
+				datasetMediaShare.addValue(value, "media", WordUtils.capitalize(key));
 			}
 		}
 
@@ -110,7 +112,7 @@ public class GenerateChart {
 			for (Map.Entry<String, Integer> entry : map.entrySet()) {
 				String key = entry.getKey();
 				Integer value = entry.getValue();
-				datasetInfluencer.addValue(value, "influencer", key);
+				datasetInfluencer.addValue(value, "influencer", WordUtils.capitalize(key));
 			}
 		}
 
