@@ -32,7 +32,7 @@ public class SeviceReportController {
 			@RequestParam(value = "w_app_logo", defaultValue = "default+logo.png") String w_app_logo,
 			@RequestParam(value = "elastic", defaultValue = "online", required = false) String elastic,
 			@RequestParam(value = "w_id", defaultValue = "1", required = false) String w_id,
-			@RequestParam(value = "id", defaultValue = "") String id)
+			@RequestParam(value = "id", defaultValue = "", required = false) String id)
 			throws FileNotFoundException, InvalidFormatException, IOException, ParseException {
 
 		MessageModel msg = new MessageModel();
@@ -48,7 +48,7 @@ public class SeviceReportController {
 			msg.setData(ret);
 
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			msg.setStatus(false);
 			msg.setMessage("failed");
 

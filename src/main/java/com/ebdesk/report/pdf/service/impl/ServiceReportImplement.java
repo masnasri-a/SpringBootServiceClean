@@ -96,7 +96,7 @@ public class ServiceReportImplement implements ServiceReport {
 		String workspace_logo = externalConfig.getPath_workspace_logo() + sql.pathLogoWorkspace(w_id);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 
 		ObjectMapper om = new ObjectMapper();
 
@@ -854,7 +854,7 @@ public class ServiceReportImplement implements ServiceReport {
 						document.add(images);
 					}
 
-					List<String> list_image = download.downloadImage(node.get("link").asText(),
+					List<String> list_image = download.downloadImageNew(node.get("link").asText(),
 							node.get("media").asText(), externalConfig.getPrinted_image());
 
 					PdfPTable table_detail_contents = new PdfPTable(4);
@@ -983,10 +983,10 @@ public class ServiceReportImplement implements ServiceReport {
 
 		try {
 
-			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 			SimpleDateFormat file = new SimpleDateFormat("dd-MMM-yyyy");
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 			SimpleDateFormat formatter = new SimpleDateFormat("dd MMMMM yyyy");
 
 			Date date_st = sdf.parse(start);
