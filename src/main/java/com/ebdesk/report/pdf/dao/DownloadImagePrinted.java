@@ -18,27 +18,28 @@ public class DownloadImagePrinted {
 	public List<String> downloadImage(String link, String media, String path_image_printed) throws IOException {
 
 		List<String> listImage = new ArrayList<String>();
-		List<String> link_list = new ArrayList<String>(Arrays.asList(link.split(";")));
+		try {
+			for (String linkURL:link.replaceAll("jpg;htt", "jpg|htt").split("\\|")) {
+				URL url = new URL(linkURL.replace("ima.blackeye.id", "192.168.24.176:9300"));
 
-		for (String imageUrl : link_list) {
-			URL url = new URL(imageUrl.replace("ima.blackeye.id", "imm.ebdesk.com"));
-			String fileName = url.getFile();
-			String destName = path_image_printed + media + "_" + fileName.replace("/", "");
+				final HttpURLConnection connection = (HttpURLConnection) url
+						.openConnection();
 
-			InputStream is = url.openStream();
-			OutputStream os = new FileOutputStream(destName);
+				connection.setRequestProperty(
+						"User-Agent",
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
 
-			byte[] b = new byte[2048];
-			int length;
+				BufferedImage image = ImageIO.read(connection.getInputStream());
+				String fileName = url.getFile();
+				String destName = path_image_printed + fileName.replace("/", "");
 
-			while ((length = is.read(b)) != -1) {
-				os.write(b, 0, length);
+				if (image != null){
+					ImageIO.write(image, "jpg", new File(destName));
+					listImage.add(destName);
+				}
 			}
+		}catch (Exception e){
 
-			is.close();
-			os.close();
-
-			listImage.add(destName);
 		}
 
 		return listImage;

@@ -411,51 +411,20 @@ public class ServiceReportImplement implements ServiceReport {
 				for (Object object : data_content) {
 					ObjectNode node = om.readValue(object.toString(), ObjectNode.class);
 
-					PdfPTable table_detail_contents = new PdfPTable(2);
+					PdfPTable table_detail_contents = new PdfPTable(4);
 					table_detail_contents.setWidthPercentage(100); // Width 100%
 					table_detail_contents.setSpacingBefore(10f); // Space before table
 					table_detail_contents.setSpacingAfter(10f); // Space after table
 					table_detail_contents.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
 
 					// Set Column widths
-					float[] columnDetailContents = { 0.3f, 2f };
+					float[] columnDetailContents = { 0.3f, 1f, 0.3f, 1f};
 					table_detail_contents.setWidths(columnDetailContents);
 
 					table_detail_contents.addCell(new Paragraph("Title"));
 					if (node.has("title")) {
 						table_detail_contents.addCell(new Paragraph(node.get("title").asText()));
 					}
-
-					table_detail_contents.addCell(new Paragraph("Media"));
-					if (node.has("media")) {
-						table_detail_contents.addCell(new Paragraph(node.get("media").asText()));
-					}
-
-					table_detail_contents.addCell(new Paragraph("Date"));
-					if (node.has("date")) {
-						table_detail_contents.addCell(new Paragraph(node.get("date").asText()));
-					}
-
-					table_detail_contents.addCell(new Paragraph("Link"));
-					if (node.has("link")) {
-						table_detail_contents.addCell(new Paragraph(node.get("link").asText()));
-					}
-
-					table_detail_contents.addCell(new Paragraph("Tone"));
-					if (node.has("tone")) {
-						table_detail_contents.addCell(new Paragraph(node.get("tone").asText()));
-					}
-
-					table_detail_contents.addCell(new Paragraph("Resume"));
-
-					if (node.has("resume")) {
-						PdfPCell cellResume = new PdfPCell(new Paragraph(node.get("resume").asText()));
-						cellResume.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
-						table_detail_contents.addCell(cellResume);
-					}
-
-					table_detail_contents.addCell(new Paragraph("Reporter"));
-					table_detail_contents.addCell(new Paragraph(""));
 
 					table_detail_contents.addCell(new Paragraph("Author"));
 					if (node.has("reporter")){
@@ -467,6 +436,90 @@ public class ServiceReportImplement implements ServiceReport {
 					}else {
 						table_detail_contents.addCell(new Paragraph("_noname"));
 					}
+
+					table_detail_contents.addCell(new Paragraph("Media"));
+					if (node.has("media")) {
+						table_detail_contents.addCell(new Paragraph(node.get("media").asText()));
+					}
+
+					table_detail_contents.addCell(new Paragraph("Reporter"));
+					table_detail_contents.addCell(new Paragraph(""));
+
+					table_detail_contents.addCell(new Paragraph("Date"));
+					if (node.has("date")) {
+						table_detail_contents.addCell(new Paragraph(node.get("date").asText()));
+					}
+
+					table_detail_contents.addCell(new Paragraph("Tone"));
+					if (node.has("tone")) {
+						table_detail_contents.addCell(new Paragraph(node.get("tone").asText()));
+					}
+
+					table_detail_contents.addCell(new Paragraph("Link"));
+					if (node.has("link")) {
+						PdfPCell cellLink = new PdfPCell(new Phrase(node.get("link").asText()));
+						cellLink.setCellEvent(new LinkInCell(node.get("link").asText().replaceAll("imm.ebdesk.com", "ima.blackeye.id")));
+						cellLink.setColspan(3);
+						table_detail_contents.addCell(cellLink);
+					}
+
+					table_detail_contents.addCell(new Paragraph("Resume"));
+					if (node.has("resume")) {
+						PdfPCell cellResume = new PdfPCell(new Paragraph(node.get("resume").asText()));
+						cellResume.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+						cellResume.setColspan(3);
+						table_detail_contents.addCell(cellResume);
+					}
+
+//					float[] columnDetailContents = { 0.3f, 2f };
+//					table_detail_contents.setWidths(columnDetailContents);
+//
+//					table_detail_contents.addCell(new Paragraph("Title"));
+//					if (node.has("title")) {
+//						table_detail_contents.addCell(new Paragraph(node.get("title").asText()));
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Media"));
+//					if (node.has("media")) {
+//						table_detail_contents.addCell(new Paragraph(node.get("media").asText()));
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Date"));
+//					if (node.has("date")) {
+//						table_detail_contents.addCell(new Paragraph(node.get("date").asText()));
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Link"));
+//					if (node.has("link")) {
+//						table_detail_contents.addCell(new Paragraph(node.get("link").asText()));
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Tone"));
+//					if (node.has("tone")) {
+//						table_detail_contents.addCell(new Paragraph(node.get("tone").asText()));
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Resume"));
+//
+//					if (node.has("resume")) {
+//						PdfPCell cellResume = new PdfPCell(new Paragraph(node.get("resume").asText()));
+//						cellResume.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+//						table_detail_contents.addCell(cellResume);
+//					}
+//
+//					table_detail_contents.addCell(new Paragraph("Reporter"));
+//					table_detail_contents.addCell(new Paragraph(""));
+//
+//					table_detail_contents.addCell(new Paragraph("Author"));
+//					if (node.has("reporter")){
+//						if (!node.get("reporter").asText().equals("")){
+//							table_detail_contents.addCell(new Paragraph(node.get("reporter").asText()));
+//						}else {
+//							table_detail_contents.addCell(new Paragraph("_noname"));
+//						}
+//					}else {
+//						table_detail_contents.addCell(new Paragraph("_noname"));
+//					}
 					document.add(table_detail_contents);
 
 					String path_logo_news = externalConfig.getNews_logo() + node.get("media").asText().replace(" ", "+")
