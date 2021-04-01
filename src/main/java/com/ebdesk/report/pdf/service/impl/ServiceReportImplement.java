@@ -96,7 +96,7 @@ public class ServiceReportImplement implements ServiceReport {
 		String workspace_logo = externalConfig.getPath_workspace_logo() + sql.pathLogoWorkspace(w_id);
 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 
 		ObjectMapper om = new ObjectMapper();
 
@@ -386,7 +386,14 @@ public class ServiceReportImplement implements ServiceReport {
 
 					table_contents.addCell(String.valueOf(no));
 					table_contents.addCell(data.get("date"));
-					table_contents.addCell(data.get("news_title"));
+					if (data.containsKey("link")){
+						PdfPCell cellLink = new PdfPCell(new Phrase(data.get("news_title")));
+						cellLink.setCellEvent(new LinkInCell(cleanTextLink(data.get("link"))));
+						table_contents.addCell(cellLink);
+					}else {
+						table_contents.addCell(data.get("news_title"));
+					}
+
 					table_contents.addCell(data.get("tone"));
 					table_contents.addCell(data.get("media"));
 					table_contents.addCell(data.get("influencers"));
@@ -863,7 +870,13 @@ public class ServiceReportImplement implements ServiceReport {
 
 					table_contents.addCell(String.valueOf(no));
 					table_contents.addCell(data.get("date"));
-					table_contents.addCell(data.get("news_title"));
+					if (data.containsKey("link")){
+						PdfPCell cellLink = new PdfPCell(new Phrase(data.get("news_title")));
+						cellLink.setCellEvent(new LinkInCell(data.get("link")));
+						table_contents.addCell(cellLink);
+					}else {
+						table_contents.addCell(data.get("news_title"));
+					}
 					table_contents.addCell(data.get("page"));
 					table_contents.addCell(data.get("tone"));
 					table_contents.addCell(data.get("media"));
@@ -907,7 +920,7 @@ public class ServiceReportImplement implements ServiceReport {
 						document.add(images);
 					}
 
-					List<String> list_image = download.downloadImage(node.get("link").asText(),
+					List<String> list_image = download.downloadImageNew(node.get("link").asText(),
 							node.get("media").asText(), externalConfig.getPrinted_image());
 
 					PdfPTable table_detail_contents = new PdfPTable(4);
@@ -1036,10 +1049,10 @@ public class ServiceReportImplement implements ServiceReport {
 
 		try {
 
-			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 			SimpleDateFormat file = new SimpleDateFormat("dd-MMM-yyyy");
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 			SimpleDateFormat formatter = new SimpleDateFormat("dd MMMMM yyyy");
 
 			Date date_st = sdf.parse(start);
@@ -1174,6 +1187,28 @@ public class ServiceReportImplement implements ServiceReport {
 				.replace("%2C", ",")
 				.replace("%2C", ",")
 				.replace("%21", "!");
+		return text;
+	}
+
+	public String cleanTextLink(String text){
+		text = text.replace(" ", "%20")
+				.replace( "+", "%2B")
+				.replace("\"", "%22")
+				.replace("#" , "%23")
+				.replace("$","%24")
+				.replace("%", "%25")
+				.replace("&", "%26")
+				.replace("'", "%27")
+				.replace("(", "%28")
+				.replace(")", "%29")
+				.replace("*", "%2A")
+				.replace("+", "%2B")
+				.replace(",", "%2C")
+				.replace(",", "%2C")
+				.replace("<", "%3C")
+				.replace(">", "%3E")
+				.replace(">", "%3E")
+				.replace("!", "%21");
 		return text;
 	}
 
