@@ -1,4 +1,4 @@
-package com.ebdesk.report.pdf;
+package com.test.service.pdf;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

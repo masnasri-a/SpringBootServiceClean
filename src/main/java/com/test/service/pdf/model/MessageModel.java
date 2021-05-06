@@ -1,4 +1,4 @@
-package com.ebdesk.report.pdf.model;
+package com.test.service.pdf.model;
 
 public class MessageModel {
 

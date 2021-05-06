@@ -1,4 +1,4 @@
-package com.ebdesk.report.pdf.config;
+package com.test.service.pdf.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.ebdesk.report.pdf;
+package com.test.service.pdf;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
